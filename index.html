@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>PSET8</title>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.1.1/d3.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+		<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,500" rel="stylesheet">
+		<style type="text/css">
+
+			#tooltip{
+				position: absolute; /* allows the tooltip to be positioned within the svg */
+				/*width: 100px;
+				height: 30px; */
+				padding: 5px;
+				background: white;
+				border: solid gray 1px;
+				z-index: 1; /* allows your tooltip to be visible on top of the svg */
+			}
+
+			#tooltip.hidden{
+				display: none;
+			}
+
+			/*#xtick{*/
+			g.tick text{
+				font-size: 14px;
+			}
+
+			g.y line{
+				display: none; /* or #y {} */
+			}
+
+		</style>
+		</head>
+		<body>
+        <main>
+						<section class="container">
+							<div class="row">
+								<h2> Boston 311 Requests </h2>
+							</div>
+
+							<div id="bar-chart">
+
+							</div>
+
+
+							<div id="tooltip" class="hidden">
+								<p>
+										Total 311 Requests: <span id="value">100</span>
+								</p>
+
+							</div>
+
+
+						</section>
+        </main>
+		<script type="text/javascript">
+
+				const width = 800;
+				const height = 600;
+				const margin = {left:300, right:30, top:30, bottom:30};
+/*
+				const marginBottom = 30;
+				const marginLeft = 300;
+				const marginTop = 100;
+				const marginRight = 30;
+*/
+
+ /*				// define the x-axis
+				// const xValues = data.map(d => d.total_count);
+				const xScale = d3.scaleLinear()
+										.domain([0, d3.max(xValues)])
+										.range([0,width]);
+				const xAxis = d3.axisTop(xScale)
+				                .ticks(6);
+				                //.tickPadding(3);
+ */
+				const svg = d3.select("#bar-chart")
+						.append("svg")
+						.attr("height",height)
+						.attr("width","100%");
+						//.attr("viewBox", [margin.left, margin.top, width+margin.right, height + margin.bottom]);
+
+				function plotBarChart(dataset) {
+					// try having done a chartgroup first
+
+ // /*
+							// define the x-axis
+							const xValues = dataset.map(d => d.total_count);
+							// console.log(xValues)
+							const xScale = d3.scaleLinear()
+													.domain([0, d3.max(xValues)])
+													.range([0,width]);
+							const xAxis = d3.axisTop(xScale)
+							                .ticks(6);
+ // */
+							// define the y axis
+							const yValues = dataset.map(d => d.Name);
+							// console.log(yValues)
+							const yScale = d3.scaleBand()
+													.domain(yValues)
+													.range([height,0])
+													.paddingInner(0.15);
+													// .paddingInner(0.15);
+							const yAxis = d3.axisLeft(yScale);
+ 															// need to fix the disappearing as well
+
+// */
+							// start the chartGroup with the x axis
+							const chartGroup = svg.append("g")
+									.attr("class","axis x")
+									.attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+									.call(xAxis);
+
+							// create y axis
+							chartGroup.append("g")
+										.attr("class", "axis y")
+										.call(yAxis);
+
+							// rectangle bars
+							chartGroup.append("g")
+											.attr("class", "bars")
+									.selectAll("rect")
+									.data(dataset)
+									.enter()
+									.append("rect")
+										.attr("y", d => yScale(d.Name))
+										.attr("x", 0)
+										.attr("width", d => xScale(d.total_count))
+										.attr("height", d => yScale.bandwidth(d.Name))
+										.attr("fill", "purple")
+
+								.on("mouseover", function(event, d) {
+										d3.select("#tooltip")
+														.style("left", event.pageX + "px")
+														.style("top", event.pageY + "px")
+												.select("#value")
+														// .html("<p>" + String(d[1]) + "</p>"); // access data by indexing array value
+														.html("<p>" + String(d.total_count) + "</p>"); // access data by object property
+
+										d3.select("#tooltip")
+												.classed("hidden", false);
+								})
+								.on("mouseout", function() {
+										d3.select("#tooltip")
+												.classed("hidden", true);
+								})
+								//;
+
+
+								/*
+											.attr("x", d => height - d.total_count * barHeightMultiplier )
+											.attr("y", (d, i) => i * (barWidth + gap) )
+											.attr("width", d => d.total_count * barHeightMultiplier)
+											.attr("height", barWidth)
+											.attr("fill", "purple")
+
+											.attr("y", (d, i) => i * (barHeight + gap) + margin.top)
+											.attr("x", margin.left)
+											.attr("width", d => d.total_count * barWidthMultiplier)
+											.attr("height", barHeight)
+											.attr("fill", "purple")
+
+											.attr("y", (d, i) => i * (barHeight + gap) + marginTop)
+											.attr("x", marginLeft)
+											.attr("width", d => d[1] * widthMultiplier)
+											.attr("height", barHeight)
+							*/
+
+									};
+
+
+					// and impotr the data and PLOT it!!
+					// load csv data - total_count is y, Name is x
+					d3.csv("./boston_311.csv", d3.autoType)
+							.then(function(data) {
+									console.log(data);
+									// const xValues = data.map(d => d.total_count);
+									plotBarChart(data);
+							})
+
+							// ocnsider the sort function
+							/*
+							function compare(a, b) {
+							  if (a.x < b.x) return -1;
+							  if (a.x > b.x) return 1;
+							  return 0;
+							}
+
+							objects.sort(compare);
+
+
+
+							// The following function is used to sort on the basis of the third element
+							function compareByThird(a, b) {
+							    var aArr = a.split(',');
+							    var bArr = b.split(',');
+							    return aArr[2] - bArr[2];
+							}
+
+							csvData.sort(compareByThird);
+
+							*/
+
+		</script>
+	</body>
+</html>
